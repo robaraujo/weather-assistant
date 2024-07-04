@@ -16,7 +16,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Next steps:
 
-***History***: create /api/history endpoint that will receive threadId in payload and return previous messages.
+<del>***History***: create /api/history endpoint that will receive threadId in payload and return previous messages.</del>
 
 ***Cache***: Cache Open Weather API response to prevent multiple calls in small period.
 
