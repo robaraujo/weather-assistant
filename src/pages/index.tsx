@@ -1,11 +1,16 @@
 import moment from 'moment';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Message = {
   content: string
   role: string
   created_at?: Date
   error?: boolean
+}
+
+type History = {
+  threadId: string
+  message: string
 }
 
 function parseJson(str: string) {
@@ -18,10 +23,46 @@ function parseJson(str: string) {
 
 export default function Home() {
   const [currentMessage, setCurrentMessage] = useState('');
+  const [historyList, setHistoryList] = useState<History[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [threadId, setThreadId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [useStream, setUseStream] = useState(true);
+
+  const saveToHistory = (threadId: string, message: string) => {
+    if (historyList.find(h => h.threadId === threadId)) return;
+
+    setHistoryList(h => [...h, { threadId, message }]);
+  };
+
+  const clearHistory = () => {
+    localStorage.setItem('chat-history', '');
+    setHistoryList([]);
+  }
+
+  const fetchHistory = async(threadId: string) => {
+    try {
+      const res = await fetch('/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ threadId }),
+      });
+
+      const history = await res.json();
+      const historyFixed = history.messages.map((h: any) => ({
+        content: h.content[0].text.value,
+        role: h.role,
+        created_at: new Date()
+      }));
+
+      setThreadId(threadId);
+      setMessages(historyFixed);
+    } catch (e: any) {
+      setLastMessage(e.message || 'Something went wrong while processing your data', true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addMsgs = (list: Array<Array<string>>) => {
     const newMsgs = list.map(([content, role]) => ({ content, role, created_at: new Date() }))
@@ -103,6 +144,21 @@ export default function Home() {
     postMsg();
   };
 
+  useEffect(() => {
+    threadId && saveToHistory(threadId, messages[0].content);
+  }, [threadId]);
+
+  useEffect(() => {
+    historyList.length && localStorage.setItem('chat-history', JSON.stringify(historyList));
+  }, [historyList]);
+
+  useEffect(() => {
+    const storage = localStorage.getItem('chat-history');
+    const list = storage ? JSON.parse(storage) : [];
+    setHistoryList(list);
+  }, []);
+
+  console.log({ historyList })
   return (
     <>
       <header>
@@ -110,6 +166,15 @@ export default function Home() {
         <h2 className='subtitle'>How can I help you?</h2>
       </header>
       <main>
+        <div className='chat-history'>
+          <h2>Your History</h2>
+          <ul>
+            {historyList.map(history => (
+              <li key={history.threadId} onClick={() => fetchHistory(history.threadId)}>{history.message}</li>
+            ))}
+          </ul>
+          {historyList.length > 0 && <button onClick={clearHistory}>Clear</button>}
+        </div>
         <div className='chat-container'>
           {messages?.filter(m => m.content).map((message: Message, i: number) => (
             <div key={i} className={`message message-${message.role} ${message.error ? 'error' : ''}`}>

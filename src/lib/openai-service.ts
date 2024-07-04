@@ -44,10 +44,25 @@ export class OpenAIService {
     }
 
     /**
+    * Fetch history message from OpenAI thread
+    * @param {string} [threadId] - The ID of the thread
+    * @returns {Promise<{ messages: Message[] | undefined, threadId: string }>} - Returns the messages and the thread ID.
+    */
+    async getHistory(threadId: string): Promise<{ messages: Message[] | undefined, threadId: string }> {
+        try {
+            const messages = await this.openai.beta.threads.messages.list(threadId, { order: 'asc' });
+            return { messages: messages.data, threadId };
+        } catch (error) {
+            console.error('Error sending message:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Sends a message to an OpenAI thread. If the thread ID is not provided, a new thread is created.
      * @param {string} content - The content of the message to be sent.
      * @param {string} [threadId] - The ID of the thread to which the message should be sent (optional).
-     * @returns {Promise<{ messages: Message[] | undefined, threadId: string }>} - Returns the messages and the thread ID after handling the run status.
+     * @returns {Promise<{ message: Message | undefined, threadId: string }>} - Returns the last message and the thread ID after handling the run status.
      */
     async chat(content: string, threadId?: string): Promise<{ messages: Message[] | undefined, threadId: string }> {
         try {

@@ -35,10 +35,10 @@ main {
   padding: 20px;
   background-color: #f4f4f9;
   overflow-y: auto;
+  flex-direction: row;
 }
 
-.chat-container {
-  flex: 1;
+.chat-history, .chat-container {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -48,6 +48,32 @@ main {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   margin-bottom: 20px;
+}
+
+.chat-history {
+  width: 30%;
+  background: rgb(240, 239, 239);
+}
+
+.chat-history h2 {
+  font-size: 1.2rem;
+  color: #333;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.chat-history ul {
+  padding-left: 1rem;
+}
+
+.chat-history li {
+  cursor: pointer;
+  list-style-type: none;
+}
+
+.chat-container {
+  width: 70%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .message {
