@@ -52,7 +52,7 @@ export default function Home() {
       const historyFixed = history.messages.map((h: any) => ({
         content: h.content[0].text.value,
         role: h.role,
-        created_at: new Date()
+        created_at: new Date(h.created_at * 1000)
       }));
 
       setThreadId(threadId);
@@ -158,7 +158,6 @@ export default function Home() {
     setHistoryList(list);
   }, []);
 
-  console.log({ historyList })
   return (
     <>
       <header>
